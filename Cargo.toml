@@ -1,0 +1,8 @@
+[package]
+name = "ants_ai_challenge_api"
+version = "0.1.0"
+authors = ["jockbert"]
+edition = "2018"
+
+[dependencies]
+indoc = "0.3"
