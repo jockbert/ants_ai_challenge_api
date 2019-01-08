@@ -1,9 +1,7 @@
-pub mod agent_actions;
 pub mod game_parameters;
 pub mod position;
 pub mod world_state;
 
-use self::agent_actions::{AgentActions, Direction};
 use self::game_parameters::GameParameters;
 use self::position::{pos, Position};
 use self::world_state::WorldState;
@@ -13,18 +11,28 @@ pub struct Score {
     pub per_player: Vec<u64>,
 }
 
+#[derive(PartialEq, Eq, Debug, Hash, Clone, Copy)]
+pub enum Direction {
+    North,
+    West,
+    South,
+    East,
+}
+
+pub type Order = (Position, Direction);
+pub type Orders = Vec<Order>;
+
 pub trait Agent {
     fn prepare(&mut self, params: &GameParameters);
-    fn make_turn(&mut self, params: &GameParameters, world: &WorldState) -> AgentActions;
+    fn make_turn(&mut self, params: &GameParameters, world: &WorldState) -> Orders;
     fn at_end(&mut self, params: &GameParameters, world: &WorldState, score: Score);
 }
 
-// TODO Add examples and coumentation, e.g.
+// TODO Add examples and documentation, e.g.
 // > [dependencies]
-// > ants_ai_challenge_api = { git = "https://github.com/..." } 
+// > ants_ai_challenge_api = { git = "https://github.com/..." }
 
-
-// TODO use parser combinators in parse methods, like 
+// TODO use parser combinators in parse methods, like
 // e.g. Nom (https://github.com/Geal/nom)
 // or Combine (https://github.com/Marwes/combine)
 
@@ -138,10 +146,10 @@ where
     (world_state, score)
 }
 
-fn serialize_actions(actions: &AgentActions) -> String {
+fn serialize_orders(orders: &Orders) -> String {
     let mut result = String::from("");
 
-    for (position, direction) in &actions.actions {
+    for (position, direction) in orders {
         result.push_str(&format!("o {} {} ", position.row, position.col));
         result.push(match direction {
             Direction::North => 'N',
@@ -158,7 +166,7 @@ fn serialize_actions(actions: &AgentActions) -> String {
 pub fn run_game(agent: &mut Agent) {
     use std::io::prelude::*;
 
-let std_in = std::io::stdin();
+    let std_in = std::io::stdin();
     let mut lines_in = std_in.lock().lines().map(|line| line.unwrap());
 
     let mut out = |line| print!("{}", line);
@@ -188,8 +196,8 @@ where
         Some(x) if x.starts_with("turn") => {
             let params = maybe_params.expect("initialized in turn 0");
             let world = parse_turn_x_lines(&mut lines_iter);
-            let actions = agent.make_turn(&params, &world);
-            let output = serialize_actions(&actions);
+            let orders = agent.make_turn(&params, &world);
+            let output = serialize_orders(&orders);
             outln(output);
             outln(String::from("go\n"));
             true
@@ -210,7 +218,6 @@ where
         // do noting in loop
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -293,21 +300,21 @@ mod tests {
             per_player: vec![1, 0],
         };
 
-        let (actual_world_state, actual_score) = parse_end_lines(&mut input.lines().map(|s| String::from(s)));
+        let (actual_world_state, actual_score) =
+            parse_end_lines(&mut input.lines().map(|s| String::from(s)));
 
         assert_eq!(expected_world_state, actual_world_state);
         assert_eq!(expected_score, actual_score);
     }
 
     #[test]
-    fn serialize_actions_success() {
-        let mut actions = AgentActions::default();
+    fn serialize_orders_success() {
+        let mut orders: Orders = vec![];
 
-        actions
-            .move_ant(pos(10, 8), Direction::North)
-            .move_ant(pos(2, 3), Direction::South)
-            .move_ant(pos(4, 5), Direction::East)
-            .move_ant(pos(6, 7), Direction::West);
+        orders.push((pos(10, 8), Direction::North));
+        orders.push((pos(2, 3), Direction::South));
+        orders.push((pos(4, 5), Direction::East));
+        orders.push((pos(6, 7), Direction::West));
 
         let expected = indoc!(
             "o 10 8 N
@@ -317,7 +324,7 @@ mod tests {
             "
         );
 
-        let actual = serialize_actions(&actions);
+        let actual = serialize_orders(&orders);
         assert_eq!(expected, actual);
     }
 }

@@ -2,9 +2,9 @@
 extern crate ants_ai_challenge_api;
 
 use ants_ai_challenge_api::*;
+use ants_ai_challenge_api::Direction::*;
 use ants_ai_challenge_api::game_parameters::GameParameters;
 use ants_ai_challenge_api::world_state::WorldState;
-use ants_ai_challenge_api::agent_actions::*;
 use ants_ai_challenge_api::position::*;
 
 use indoc::indoc;
@@ -14,7 +14,7 @@ struct TestAgent {
     prep_call_count: u32,
     make_turn_call_count: u32,
     at_end_call_count: u32,
-    agent_actions_to_make: AgentActions,
+    orders_to_make: Orders,
     expected_game_params: GameParameters,
     expected_world_state: WorldState,
     expected_score: Score,
@@ -29,7 +29,7 @@ impl Agent for TestAgent {
         );
     }
 
-    fn make_turn(&mut self, params: &GameParameters, world: &WorldState) -> AgentActions {
+    fn make_turn(&mut self, params: &GameParameters, world: &WorldState) -> Orders {
         self.make_turn_call_count += 1;
         assert_eq!(
             &self.expected_game_params, params,
@@ -39,7 +39,7 @@ impl Agent for TestAgent {
             &self.expected_world_state, world,
             "Expecting left but got right"
         );
-        self.agent_actions_to_make.clone()
+        self.orders_to_make.clone()
     }
 
     fn at_end(&mut self, params: &GameParameters, world: &WorldState, score: Score) {
@@ -135,10 +135,7 @@ fn run_game_success() {
         per_player: vec![1, 0],
     };
 
-    test_agent.agent_actions_to_make = AgentActions::default();
-    test_agent
-        .agent_actions_to_make
-        .move_ant(pos(1, 2), Direction::North);
+    test_agent.orders_to_make = vec!((pos(1, 2), North));
 
     run_game_with_io(&mut test_agent, input.lines().map(|s| String::from(s)), &mut add_outputln);
 
