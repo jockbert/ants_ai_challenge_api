@@ -2,9 +2,10 @@ pub mod game_parameters;
 pub mod position;
 pub mod world_state;
 
-use self::game_parameters::GameParameters;
-use self::position::{pos, Position};
-use self::world_state::WorldState;
+pub use self::game_parameters::GameParameters;
+pub use self::position::{pos, Position};
+pub use self::world_state::WorldState;
+pub use self::Direction::*;
 
 #[derive(PartialEq, Eq, Debug, Default, Hash, Clone)]
 pub struct Score {

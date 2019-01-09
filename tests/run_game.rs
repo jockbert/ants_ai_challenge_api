@@ -2,11 +2,6 @@
 extern crate ants_ai_challenge_api;
 
 use ants_ai_challenge_api::*;
-use ants_ai_challenge_api::Direction::*;
-use ants_ai_challenge_api::game_parameters::GameParameters;
-use ants_ai_challenge_api::world_state::WorldState;
-use ants_ai_challenge_api::position::*;
-
 use indoc::indoc;
 
 #[derive(Debug, Default)]
