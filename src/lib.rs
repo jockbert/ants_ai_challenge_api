@@ -24,8 +24,8 @@ pub type Order = (Position, Direction);
 pub type Orders = Vec<Order>;
 
 pub trait Agent {
-    fn prepare(&mut self, params: &GameParameters);
-    fn make_turn(&mut self, world: &WorldState, turn_count: u32) -> Orders;
+    fn prepare(&mut self, params: GameParameters);
+    fn make_turn(&mut self, world: WorldState, turn_count: u32) -> Orders;
 }
 
 // TODO Add examples and documentation, e.g.
@@ -189,13 +189,13 @@ where
             }
             Some("turn 0") => {
                 let params = parse_turn_0_lines(&mut lines_iter);
-                agent.prepare(&params);
+                agent.prepare(params);
                 outln(String::from("go\n"));
             }
             Some(x) if x.starts_with("turn") => {
                 turn_count += 1;
                 let world = parse_turn_x_lines(&mut lines_iter);
-                let orders = agent.make_turn(&world, turn_count);
+                let orders = agent.make_turn(world, turn_count);
                 let output = serialize_orders(&orders);
                 outln(output);
                 outln(String::from("go\n"));
