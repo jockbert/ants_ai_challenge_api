@@ -26,7 +26,6 @@ pub type Orders = Vec<Order>;
 pub trait Agent {
     fn prepare(&mut self, params: &GameParameters);
     fn make_turn(&mut self, world: &WorldState, turn_count: u32) -> Orders;
-    fn at_end(&mut self, world: &WorldState, score: Score);
 }
 
 // TODO Add examples and documentation, e.g.
@@ -164,18 +163,20 @@ fn serialize_orders(orders: &Orders) -> String {
     result
 }
 
-pub fn run_game(agent: &mut Agent) {
+pub fn run_game(agent: &mut Agent) -> (WorldState, Score) {
     use std::io::prelude::*;
 
     let std_in = std::io::stdin();
     let mut lines_in = std_in.lock().lines().map(|line| line.unwrap());
-
     let mut out = |line| print!("{}", line);
-
-    run_game_with_io(agent, &mut lines_in, &mut out);
+    run_game_with_io(agent, &mut lines_in, &mut out)
 }
 
-pub fn run_game_with_io<I, O>(agent: &mut Agent, mut lines_iter: I, outln: &mut O)
+pub fn run_game_with_io<I, O>(
+    agent: &mut Agent,
+    mut lines_iter: I,
+    outln: &mut O,
+) -> (WorldState, Score)
 where
     I: Iterator<Item = String>,
     O: FnMut(String) -> (),
@@ -199,17 +200,16 @@ where
                 outln(output);
                 outln(String::from("go\n"));
             }
-            Some("end") => {
-                let (world, score) = parse_end_lines(&mut lines_iter);
-                agent.at_end(&world, score);
-            }
+            Some("end") => break,
             Some(x) => {
                 eprintln!("Unexpected input line <{:?}>. Exiting", x);
-                break;
+                panic!("Unexpected input line <{:?}>. Exiting", x)
             }
             _ => break,
         }
     }
+
+    parse_end_lines(&mut lines_iter)
 }
 
 #[cfg(test)]

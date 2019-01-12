@@ -36,15 +36,6 @@ impl Agent for TestAgent {
         );
         self.orders_to_make.clone()
     }
-
-    fn at_end(&mut self, world: &WorldState, score: Score) {
-        self.at_end_call_count += 1;
-        assert_eq!(
-            &self.expected_world_state, world,
-            "Expecting left but got right"
-        );
-        assert_eq!(&self.expected_score, &score);
-    }
 }
 
 #[test]
@@ -122,20 +113,29 @@ fn run_game_success() {
         .live_ant(10, 8, 0)
         .hill(7, 12, 1);
 
-    test_agent.expected_score = Score {
-        per_player: vec![1, 0],
-    };
+    test_agent.orders_to_make = vec![(pos(1, 2), North)];
 
-    test_agent.orders_to_make = vec!((pos(1, 2), North));
-
-    run_game_with_io(&mut test_agent, input.lines().map(|s| String::from(s)), &mut add_outputln);
+    let (world_at_end, score) = run_game_with_io(
+        &mut test_agent,
+        input.lines().map(|s| String::from(s)),
+        &mut add_outputln,
+    );
 
     assert_eq!(1, test_agent.prep_call_count, "one prepare call after use");
     assert_eq!(
         2, test_agent.make_turn_call_count,
         "two make_turn calls after use"
     );
-    assert_eq!(1, test_agent.at_end_call_count, "one at_end call after use");
+
+    assert_eq!(
+        test_agent.expected_world_state, world_at_end,
+        "WorldState at game end"
+    );
+
+    let expected_score = Score {
+        per_player: vec![1, 0],
+    };
+    assert_eq!(expected_score, score, "Score at game end");
 
     assert_eq!(
         indoc!(
