@@ -24,8 +24,12 @@ impl Agent for TestAgent {
         );
     }
 
-    fn make_turn(&mut self, world: &WorldState) -> Orders {
+    fn make_turn(&mut self, world: &WorldState, turn_count: u32) -> Orders {
         self.make_turn_call_count += 1;
+        assert_eq!(
+            self.make_turn_call_count, turn_count,
+            "Turn count, expecting left but go right"
+        );
         assert_eq!(
             &self.expected_world_state, world,
             "Expecting left but got right"

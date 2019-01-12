@@ -25,7 +25,7 @@ pub type Orders = Vec<Order>;
 
 pub trait Agent {
     fn prepare(&mut self, params: &GameParameters);
-    fn make_turn(&mut self, world: &WorldState) -> Orders;
+    fn make_turn(&mut self, world: &WorldState, turn_count: u32) -> Orders;
     fn at_end(&mut self, world: &WorldState, score: Score);
 }
 
@@ -180,6 +180,7 @@ where
     I: Iterator<Item = String>,
     O: FnMut(String) -> (),
 {
+    let mut turn_count: u32 = 0;
     loop {
         match lines_iter.next().as_ref().map(String::as_ref) {
             Some("") => {
@@ -191,8 +192,9 @@ where
                 outln(String::from("go\n"));
             }
             Some(x) if x.starts_with("turn") => {
+                turn_count += 1;
                 let world = parse_turn_x_lines(&mut lines_iter);
-                let orders = agent.make_turn(&world);
+                let orders = agent.make_turn(&world, turn_count);
                 let output = serialize_orders(&orders);
                 outln(output);
                 outln(String::from("go\n"));
