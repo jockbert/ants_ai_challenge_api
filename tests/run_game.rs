@@ -1,4 +1,3 @@
-
 extern crate ants_ai_challenge_api;
 
 use ants_ai_challenge_api::*;

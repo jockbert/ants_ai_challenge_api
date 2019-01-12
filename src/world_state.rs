@@ -1,4 +1,3 @@
-
 use super::{pos, Position};
 
 #[derive(PartialEq, Eq, Debug, Default)]

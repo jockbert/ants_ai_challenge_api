@@ -1,4 +1,3 @@
-
 #[derive(PartialEq, Eq, Debug, Default, Hash, Clone, Copy)]
 pub struct GameParameters {
     // in milliseconds, time given for bot to start up after it is given "ready" (see below)
@@ -47,7 +46,6 @@ impl GameParameters {
         self
     }
 }
-
 
 #[cfg(test)]
 mod tests {
