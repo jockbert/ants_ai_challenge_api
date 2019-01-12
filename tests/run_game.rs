@@ -24,12 +24,8 @@ impl Agent for TestAgent {
         );
     }
 
-    fn make_turn(&mut self, params: &GameParameters, world: &WorldState) -> Orders {
+    fn make_turn(&mut self, world: &WorldState) -> Orders {
         self.make_turn_call_count += 1;
-        assert_eq!(
-            &self.expected_game_params, params,
-            "Expecting left but got right"
-        );
         assert_eq!(
             &self.expected_world_state, world,
             "Expecting left but got right"
@@ -37,12 +33,8 @@ impl Agent for TestAgent {
         self.orders_to_make.clone()
     }
 
-    fn at_end(&mut self, params: &GameParameters, world: &WorldState, score: Score) {
+    fn at_end(&mut self, world: &WorldState, score: Score) {
         self.at_end_call_count += 1;
-        assert_eq!(
-            &self.expected_game_params, params,
-            "Expecting left but got right"
-        );
         assert_eq!(
             &self.expected_world_state, world,
             "Expecting left but got right"

@@ -25,8 +25,8 @@ pub type Orders = Vec<Order>;
 
 pub trait Agent {
     fn prepare(&mut self, params: &GameParameters);
-    fn make_turn(&mut self, params: &GameParameters, world: &WorldState) -> Orders;
-    fn at_end(&mut self, params: &GameParameters, world: &WorldState, score: Score);
+    fn make_turn(&mut self, world: &WorldState) -> Orders;
+    fn at_end(&mut self, world: &WorldState, score: Score);
 }
 
 // TODO Add examples and documentation, e.g.
@@ -180,43 +180,33 @@ where
     I: Iterator<Item = String>,
     O: FnMut(String) -> (),
 {
-    let mut maybe_params: Option<GameParameters> = None;
-
-    while match lines_iter.next().as_ref().map(String::as_ref) {
-        Some("") => {
-            // empty line
-            true
+    loop {
+        match lines_iter.next().as_ref().map(String::as_ref) {
+            Some("") => {
+                // empty line
+            }
+            Some("turn 0") => {
+                let params = parse_turn_0_lines(&mut lines_iter);
+                agent.prepare(&params);
+                outln(String::from("go\n"));
+            }
+            Some(x) if x.starts_with("turn") => {
+                let world = parse_turn_x_lines(&mut lines_iter);
+                let orders = agent.make_turn(&world);
+                let output = serialize_orders(&orders);
+                outln(output);
+                outln(String::from("go\n"));
+            }
+            Some("end") => {
+                let (world, score) = parse_end_lines(&mut lines_iter);
+                agent.at_end(&world, score);
+            }
+            Some(x) => {
+                eprintln!("Unexpected input line <{:?}>. Exiting", x);
+                break;
+            }
+            _ => break,
         }
-        Some("turn 0") => {
-            let params = parse_turn_0_lines(&mut lines_iter);
-            agent.prepare(&params);
-            maybe_params = Some(params);
-            outln(String::from("go\n"));
-            true
-        }
-        Some(x) if x.starts_with("turn") => {
-            let params = maybe_params.expect("initialized in turn 0");
-            let world = parse_turn_x_lines(&mut lines_iter);
-            let orders = agent.make_turn(&params, &world);
-            let output = serialize_orders(&orders);
-            outln(output);
-            outln(String::from("go\n"));
-            true
-        }
-        Some("end") => {
-            let params = maybe_params.expect("initialized in turn 0");
-            let (world, score) = parse_end_lines(&mut lines_iter);
-            agent.at_end(&params, &world, score);
-
-            false
-        }
-        Some(x) => {
-            eprintln!("Unexpected input line <{:?}>. Exiting", x);
-            false
-        }
-        _ => false,
-    } {
-        // do noting in loop
     }
 }
 
