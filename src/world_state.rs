@@ -1,4 +1,4 @@
-use super::{pos, Position};
+use super::Position;
 
 #[derive(PartialEq, Eq, Debug, Default)]
 pub struct WorldState {
@@ -18,6 +18,9 @@ fn ensure_capacity(vec: &mut Vec<Vec<Position>>, capacity: u8) {
     while vec.len() <= capacity as usize {
         vec.push(vec![])
     }
+}
+fn get_or_empty(vec: &Vec<Vec<Position>>, index: u8) -> Vec<Position> {
+    vec.get(index as usize).cloned().unwrap_or_else(|| vec![])
 }
 
 impl WorldState {
@@ -62,26 +65,21 @@ impl WorldState {
     }
 
     pub fn live_ants_for_player(&self, player: u8) -> Vec<Position> {
-        self.live_ants
-            .get(player as usize)
-            .cloned()
-            .unwrap_or(vec![])
+        get_or_empty(&self.live_ants, player)
     }
 
     pub fn dead_ants_for_player(&self, player: u8) -> Vec<Position> {
-        self.dead_ants
-            .get(player as usize)
-            .cloned()
-            .unwrap_or(vec![])
+        get_or_empty(&self.dead_ants, player)
     }
 
     pub fn hills_for_player(&self, player: u8) -> Vec<Position> {
-        self.hills.get(player as usize).cloned().unwrap_or(vec![])
+        get_or_empty(&self.hills, player)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::super::pos;
     use super::*;
 
     #[test]

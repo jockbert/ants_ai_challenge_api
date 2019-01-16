@@ -116,7 +116,7 @@ fn run_game_success() {
 
     let (world_at_end, score) = run_game_with_io(
         &mut test_agent,
-        input.lines().map(|s| String::from(s)),
+        input.lines().map(String::from),
         &mut add_outputln,
     );
 

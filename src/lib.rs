@@ -43,13 +43,13 @@ where
     let mut result = GameParameters::default();
 
     for line in lines_iter {
-        let mut ws = line.split_whitespace();
-        match (ws.next(), ws.next()) {
+        let mut tokens = line.split_whitespace();
+        match (tokens.next(), tokens.next()) {
             (Some("ready"), _) => break,
             (Some(x), Some(y)) => {
                 result.put(x, y);
             }
-            (x, y) => eprintln!("Unknown tokens when parsing turn 0: {:?} {:?}", x, y),
+            (x, y) => panic!("Bad tokens when parsing turn 0: {:?} {:?}", x, y),
         }
     }
     result
@@ -65,43 +65,34 @@ where
     fn parse_col(col: &str) -> u16 {
         col.parse().expect("Col")
     }
-    fn parse_owner(owner: &str) -> u8 {
+    fn parse_own(owner: &str) -> u8 {
         owner.parse().expect("Owner")
     }
     fn parse_pos(row: &str, col: &str) -> Position {
         pos(parse_row(row), parse_col(col))
     }
 
-    let mut result = WorldState::default();
+    let mut world = WorldState::default();
 
     for line in lines_iter {
-        let mut ws = line.split_whitespace();
-        match (ws.next(), ws.next(), ws.next(), ws.next()) {
+        let mut tokens = line.split_whitespace();
+        world = match (tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
             (Some("go"), _, _, _) => break,
             // water
-            (Some("w"), Some(r), Some(c), None) => result = result.water(parse_pos(r, c)),
+            (Some("w"), Some(r), Some(c), None) => world.water(parse_pos(r, c)),
             // food
-            (Some("f"), Some(r), Some(c), None) => result = result.food(parse_pos(r, c)),
+            (Some("f"), Some(r), Some(c), None) => world.food(parse_pos(r, c)),
             // hill
-            (Some("h"), Some(r), Some(c), Some(o)) => {
-                result = result.hill(parse_pos(r, c), parse_owner(o))
-            }
+            (Some("h"), Some(r), Some(c), Some(o)) => world.hill(parse_pos(r, c), parse_own(o)),
             // live ants
-            (Some("a"), Some(r), Some(c), Some(o)) => {
-                result = result.live_ant(parse_pos(r, c), parse_owner(o))
-            }
+            (Some("a"), Some(r), Some(c), Some(o)) => world.live_ant(parse_pos(r, c), parse_own(o)),
             // dead ants
-            (Some("d"), Some(r), Some(c), Some(o)) => {
-                result = result.dead_ant(parse_pos(r, c), parse_owner(o))
-            }
+            (Some("d"), Some(r), Some(c), Some(o)) => world.dead_ant(parse_pos(r, c), parse_own(o)),
             // bad input
-            (a, b, c, d) => eprintln!(
-                "Unknown tokens when parsing turn X: {:?} {:?} {:?} {:?}",
-                a, b, c, d
-            ),
+            (a, b, c, d) => panic!("Bad tokens parsing turn X: {:?} {:?} {:?} {:?}", a, b, c, d),
         }
     }
-    result
+    world
 }
 
 fn parse_end_lines<I>(lines_iter: &mut I) -> (WorldState, Score)
@@ -147,7 +138,7 @@ where
     (world_state, score)
 }
 
-fn serialize_orders(orders: &Orders) -> String {
+fn serialize_orders(orders: &[Order]) -> String {
     let mut result = String::from("");
 
     for (position, direction) in orders {
@@ -185,9 +176,7 @@ where
     let mut turn_count: u32 = 0;
     loop {
         match lines_iter.next().as_ref().map(String::as_ref) {
-            Some("") => {
-                // empty line
-            }
+            Some("") => (), /* empty line  */
             Some("turn 0") => {
                 let params = parse_turn_0_lines(&mut lines_iter);
                 agent.prepare(params);
@@ -199,14 +188,11 @@ where
                 let orders = agent.make_turn(world, turn_count);
                 let output = serialize_orders(&orders);
                 outln(output);
-                outln(String::from("go\n"));
+                outln("go\n".to_string());
             }
             Some("end") => break,
-            Some(x) => {
-                eprintln!("Unexpected input line <{:?}>. Exiting", x);
-                panic!("Unexpected input line <{:?}>. Exiting", x)
-            }
-            _ => break,
+            Some(x) => panic!("Unexpected input line <{:?}>", x),
+            None => panic!("Unexpected end of input lines"),
         }
     }
 
@@ -244,7 +230,7 @@ mod tests {
             player_seed: 42,
         };
 
-        let actual = parse_turn_0_lines(&mut input.lines().map(|s| String::from(s)));
+        let actual = parse_turn_0_lines(&mut input.lines().map(String::from));
         assert_eq!(expected, actual);
     }
 
@@ -268,7 +254,7 @@ mod tests {
             .live_ant(pos(10, 9), 0)
             .hill(pos(7, 12), 1);
 
-        let actual = parse_turn_x_lines(&mut input.lines().map(|s| String::from(s)));
+        let actual = parse_turn_x_lines(&mut input.lines().map(String::from));
         assert_eq!(expected, actual);
     }
 
@@ -295,7 +281,7 @@ mod tests {
         };
 
         let (actual_world_state, actual_score) =
-            parse_end_lines(&mut input.lines().map(|s| String::from(s)));
+            parse_end_lines(&mut input.lines().map(String::from));
 
         assert_eq!(expected_world_state, actual_world_state);
         assert_eq!(expected_score, actual_score);
