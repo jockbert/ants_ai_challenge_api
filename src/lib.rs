@@ -60,39 +60,38 @@ where
     I: Iterator<Item = String>,
 {
     fn parse_row(row: &str) -> u16 {
-        row.parse().expect("Row")
+        row.parse().expect("Parsing position row")
     }
     fn parse_col(col: &str) -> u16 {
-        col.parse().expect("Col")
+        col.parse().expect("Parsing position column")
     }
-    fn parse_own(owner: &str) -> u8 {
-        owner.parse().expect("Owner")
-    }
-    fn parse_pos(row: &str, col: &str) -> Position {
-        pos(parse_row(row), parse_col(col))
+    fn parse_owner(owner: &str) -> u8 {
+        owner.parse().expect("Parsing owner")
     }
 
-    let mut world = WorldState::default();
+    lines_iter
+        .take_while(|line| line.trim() != "go")
+        .fold(WorldState::default(), |world, line| {
+            let mut tokens = line.split_whitespace();
+            let item = tokens.next();
+            let row = tokens.next().map(parse_row);
+            let col = tokens.next().map(parse_col);
+            let owner = tokens.next().map(parse_owner);
 
-    for line in lines_iter {
-        let mut tokens = line.split_whitespace();
-        world = match (tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
-            (Some("go"), _, _, _) => break,
-            // water
-            (Some("w"), Some(r), Some(c), None) => world.water(parse_pos(r, c)),
-            // food
-            (Some("f"), Some(r), Some(c), None) => world.food(parse_pos(r, c)),
-            // hill
-            (Some("h"), Some(r), Some(c), Some(o)) => world.hill(parse_pos(r, c), parse_own(o)),
-            // live ants
-            (Some("a"), Some(r), Some(c), Some(o)) => world.live_ant(parse_pos(r, c), parse_own(o)),
-            // dead ants
-            (Some("d"), Some(r), Some(c), Some(o)) => world.dead_ant(parse_pos(r, c), parse_own(o)),
-            // bad input
-            (a, b, c, d) => panic!("Bad tokens parsing turn X: {:?} {:?} {:?} {:?}", a, b, c, d),
-        }
-    }
-    world
+            let pos = match (row, col) {
+                (Some(r), Some(c)) => pos(r, c),
+                (r, c) => panic!("Bad position when parsing turn X: {:?} {:?}", r, c),
+            };
+
+            match (item, owner) {
+                (Some("w"), None) => world.water(pos),
+                (Some("f"), None) => world.food(pos),
+                (Some("h"), Some(o)) => world.hill(pos, o),
+                (Some("a"), Some(o)) => world.live_ant(pos, o),
+                (Some("d"), Some(o)) => world.dead_ant(pos, o),
+                (i, o) => panic!("Bad item {:?} or owner {:?} when parsing turn X", i, o),
+            }
+        })
 }
 
 fn parse_end_lines<I>(lines_iter: &mut I) -> (WorldState, Score)
