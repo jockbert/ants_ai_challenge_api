@@ -14,57 +14,43 @@ pub struct WorldState {
     pub hills: Vec<Vec<Position>>,
 }
 
+fn ensure_capacity(vec: &mut Vec<Vec<Position>>, capacity: u8) {
+    while vec.len() <= capacity as usize {
+        vec.push(vec![])
+    }
+}
+
 impl WorldState {
     /// Add food at given position
-    pub fn food(mut self, row: u16, column: u16) -> Self {
-        self.foods.push(pos(row, column));
+    pub fn food(mut self, pos: Position) -> Self {
+        self.foods.push(pos);
         self
     }
+
     /// Add water at given position
-    pub fn water(mut self, row: u16, column: u16) -> Self {
-        self.waters.push(pos(row, column));
+    pub fn water(mut self, pos: Position) -> Self {
+        self.waters.push(pos);
         self
     }
 
     /// Add live ant at given position for a player
-    pub fn live_ant(mut self, row: u16, column: u16, player: u8) -> Self {
-        // ensure capacity
-        while self.live_ants.len() <= player as usize {
-            self.live_ants.push(vec![])
-        }
-
-        self.live_ants
-            .get_mut(player as usize)
-            .unwrap()
-            .push(pos(row, column));
+    pub fn live_ant(mut self, pos: Position, player: u8) -> Self {
+        ensure_capacity(&mut self.live_ants, player);
+        self.live_ants[player as usize].push(pos);
         self
     }
 
     /// Add dead ant at given position for a player
-    pub fn dead_ant(mut self, row: u16, column: u16, player: u8) -> Self {
-        // ensure capacity
-        while self.dead_ants.len() <= player as usize {
-            self.dead_ants.push(vec![])
-        }
-
-        self.dead_ants
-            .get_mut(player as usize)
-            .unwrap()
-            .push(pos(row, column));
+    pub fn dead_ant(mut self, pos: Position, player: u8) -> Self {
+        ensure_capacity(&mut self.dead_ants, player);
+        self.dead_ants[player as usize].push(pos);
         self
     }
 
     /// Add hill at given position for a player
-    pub fn hill(mut self, row: u16, column: u16, player: u8) -> Self {
-        // ensure capacity
-        while self.hills.len() <= player as usize {
-            self.hills.push(vec![])
-        }
-
-        self.hills
-            .get_mut(player as usize)
-            .unwrap()
-            .push(pos(row, column));
+    pub fn hill(mut self, pos: Position, player: u8) -> Self {
+        ensure_capacity(&mut self.hills, player);
+        self.hills[player as usize].push(pos);
         self
     }
 
@@ -109,13 +95,13 @@ mod tests {
         };
 
         let actual = WorldState::default()
-            .food(6, 5)
-            .water(7, 6)
-            .live_ant(7, 9, 1)
-            .live_ant(10, 8, 0)
-            .live_ant(10, 9, 0)
-            .hill(7, 12, 1)
-            .dead_ant(17, 19, 3);
+            .food(pos(6, 5))
+            .water(pos(7, 6))
+            .live_ant(pos(7, 9), 1)
+            .live_ant(pos(10, 8), 0)
+            .live_ant(pos(10, 9), 0)
+            .hill(pos(7, 12), 1)
+            .dead_ant(pos(17, 19), 3);
 
         assert_eq!(expected, actual);
     }
@@ -123,13 +109,13 @@ mod tests {
     #[test]
     fn per_player_getters() {
         let actual = WorldState::default()
-            .food(6, 5)
-            .water(7, 6)
-            .live_ant(7, 9, 1)
-            .live_ant(10, 8, 0)
-            .live_ant(10, 9, 0)
-            .hill(7, 12, 1)
-            .dead_ant(17, 19, 3);
+            .food(pos(6, 5))
+            .water(pos(7, 6))
+            .live_ant(pos(7, 9), 1)
+            .live_ant(pos(10, 8), 0)
+            .live_ant(pos(10, 9), 0)
+            .hill(pos(7, 12), 1)
+            .dead_ant(pos(17, 19), 3);
 
         // Exists player indexes 0-3 for dead ants
         assert_eq!(4, actual.max_player_count());

@@ -106,11 +106,11 @@ fn run_game_success() {
     };
 
     test_agent.expected_world_state = WorldState::default()
-        .food(6, 5)
-        .water(7, 6)
-        .dead_ant(7, 9, 1)
-        .live_ant(10, 8, 0)
-        .hill(7, 12, 1);
+        .food(pos(6, 5))
+        .water(pos(7, 6))
+        .dead_ant(pos(7, 9), 1)
+        .live_ant(pos(10, 8), 0)
+        .hill(pos(7, 12), 1);
 
     test_agent.orders_to_make = vec![(pos(1, 2), North)];
 

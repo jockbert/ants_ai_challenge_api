@@ -68,6 +68,9 @@ where
     fn parse_owner(owner: &str) -> u8 {
         owner.parse().expect("Owner")
     }
+    fn parse_pos(row: &str, col: &str) -> Position {
+        pos(parse_row(row), parse_col(col))
+    }
 
     let mut result = WorldState::default();
 
@@ -76,22 +79,20 @@ where
         match (ws.next(), ws.next(), ws.next(), ws.next()) {
             (Some("go"), _, _, _) => break,
             // water
-            (Some("w"), Some(r), Some(c), None) => {
-                result = result.water(parse_row(r), parse_col(c))
-            }
+            (Some("w"), Some(r), Some(c), None) => result = result.water(parse_pos(r, c)),
             // food
-            (Some("f"), Some(r), Some(c), None) => result = result.food(parse_row(r), parse_col(c)),
+            (Some("f"), Some(r), Some(c), None) => result = result.food(parse_pos(r, c)),
             // hill
             (Some("h"), Some(r), Some(c), Some(o)) => {
-                result = result.hill(parse_row(r), parse_col(c), parse_owner(o))
+                result = result.hill(parse_pos(r, c), parse_owner(o))
             }
             // live ants
             (Some("a"), Some(r), Some(c), Some(o)) => {
-                result = result.live_ant(parse_row(r), parse_col(c), parse_owner(o))
+                result = result.live_ant(parse_pos(r, c), parse_owner(o))
             }
             // dead ants
             (Some("d"), Some(r), Some(c), Some(o)) => {
-                result = result.dead_ant(parse_row(r), parse_col(c), parse_owner(o))
+                result = result.dead_ant(parse_pos(r, c), parse_owner(o))
             }
             // bad input
             (a, b, c, d) => eprintln!(
@@ -260,12 +261,12 @@ mod tests {
         );
 
         let expected = WorldState::default()
-            .food(6, 5)
-            .water(7, 6)
-            .live_ant(7, 9, 1)
-            .live_ant(10, 8, 0)
-            .live_ant(10, 9, 0)
-            .hill(7, 12, 1);
+            .food(pos(6, 5))
+            .water(pos(7, 6))
+            .live_ant(pos(7, 9), 1)
+            .live_ant(pos(10, 8), 0)
+            .live_ant(pos(10, 9), 0)
+            .hill(pos(7, 12), 1);
 
         let actual = parse_turn_x_lines(&mut input.lines().map(|s| String::from(s)));
         assert_eq!(expected, actual);
@@ -284,10 +285,10 @@ mod tests {
         );
 
         let expected_world_state = WorldState::default()
-            .food(6, 5)
-            .dead_ant(7, 8, 1)
-            .live_ant(9, 8, 0)
-            .live_ant(9, 9, 0);
+            .food(pos(6, 5))
+            .dead_ant(pos(7, 8), 1)
+            .live_ant(pos(9, 8), 0)
+            .live_ant(pos(9, 9), 0);
 
         let expected_score = Score {
             per_player: vec![1, 0],
