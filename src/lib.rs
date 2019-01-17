@@ -40,19 +40,32 @@ fn parse_turn_0_lines<I>(lines_iter: &mut I) -> GameParameters
 where
     I: Iterator<Item = String>,
 {
-    let mut result = GameParameters::default();
+    let seed = GameParameters::default();
+    lines_iter
+        .take_while(|line| line.trim() != "ready")
+        .fold(seed, |mut params, line| {
+            let mut tokens = line.split_whitespace();
+            let name = tokens.next().expect("Game parameter name");
+            let value: i64 = tokens
+                .next()
+                .expect("Game parameter value")
+                .parse()
+                .expect("Value should be valud integer");
 
-    for line in lines_iter {
-        let mut tokens = line.split_whitespace();
-        match (tokens.next(), tokens.next()) {
-            (Some("ready"), _) => break,
-            (Some(x), Some(y)) => {
-                result.put(x, y);
-            }
-            (x, y) => panic!("Bad tokens when parsing turn 0: {:?} {:?}", x, y),
-        }
-    }
-    result
+            match name {
+                "loadtime" => params.loadtime_ms = value,
+                "turntime" => params.turntime_ms = value,
+                "rows" => params.rows = value,
+                "cols" => params.cols = value,
+                "turns" => params.turns = value,
+                "viewradius2" => params.viewradius2 = value,
+                "attackradius2" => params.attackradius2 = value,
+                "spawnradius2" => params.spawnradius2 = value,
+                "player_seed" => params.player_seed = value,
+                _ => panic!("Unknown game parameter '{}', with value '{}'.", name, value),
+            };
+            params
+        })
 }
 
 fn parse_turn_x_lines<I>(lines_iter: &mut I) -> WorldState
