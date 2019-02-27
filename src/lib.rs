@@ -3,25 +3,14 @@ pub mod position;
 pub mod world_state;
 
 pub use self::game_parameters::GameParameters;
-pub use self::position::{pos, Position};
+pub use self::position::Direction::*;
+pub use self::position::*;
 pub use self::world_state::WorldState;
-pub use self::Direction::*;
 
 #[derive(PartialEq, Eq, Debug, Default, Hash, Clone)]
 pub struct Score {
     pub per_player: Vec<u64>,
 }
-
-#[derive(PartialEq, Eq, Debug, Hash, Clone, Copy)]
-pub enum Direction {
-    North,
-    West,
-    South,
-    East,
-}
-
-pub type Order = (Position, Direction);
-pub type Orders = Vec<Order>;
 
 pub trait Agent {
     fn prepare(&mut self, params: GameParameters);
@@ -153,9 +142,9 @@ where
 fn serialize_orders(orders: &[Order]) -> String {
     let mut result = String::from("");
 
-    for (position, direction) in orders {
-        result.push_str(&format!("o {} {} ", position.row, position.col));
-        result.push(match direction {
+    for order in orders {
+        result.push_str(&format!("o {} {} ", order.pos.row, order.pos.col));
+        result.push(match order.dir {
             Direction::North => 'N',
             Direction::South => 'S',
             Direction::West => 'W',
@@ -303,10 +292,10 @@ mod tests {
     fn serialize_orders_success() {
         let mut orders: Orders = vec![];
 
-        orders.push((pos(10, 8), Direction::North));
-        orders.push((pos(2, 3), Direction::South));
-        orders.push((pos(4, 5), Direction::East));
-        orders.push((pos(6, 7), Direction::West));
+        orders.push(pos(10, 8).order(Direction::North));
+        orders.push(pos(2, 3).order(Direction::South));
+        orders.push(pos(4, 5).order(Direction::East));
+        orders.push(pos(6, 7).order(Direction::West));
 
         let expected = indoc!(
             "o 10 8 N

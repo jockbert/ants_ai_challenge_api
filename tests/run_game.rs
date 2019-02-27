@@ -112,7 +112,7 @@ fn run_game_success() {
         .live_ant(pos(10, 8), 0)
         .hill(pos(7, 12), 1);
 
-    test_agent.orders_to_make = vec![(pos(1, 2), North)];
+    test_agent.orders_to_make = vec![pos(1, 2).order(North)];
 
     let (world_at_end, score) = run_game_with_io(
         &mut test_agent,
