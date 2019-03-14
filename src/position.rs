@@ -15,6 +15,21 @@ pub enum Direction {
     East,
 }
 
+impl Direction {
+    /// Reverse the direction
+    ///
+    /// East becomes West, North becomes South and vice versa.
+    pub fn reverse(self) -> Direction {
+        use Direction::*;
+        match self {
+            North => South,
+            South => North,
+            West => East,
+            East => West,
+        }
+    }
+}
+
 #[derive(PartialEq, Eq, Debug, Hash, Clone)]
 pub struct Order {
     pub pos: Position,
@@ -56,5 +71,14 @@ impl Order {
             Order { pos: p, dir: West } => pos(p.row, (p.col + col_max - 1) % col_max),
             Order { pos: p, dir: East } => pos(p.row, (p.col + 1) % col_max),
         }
+    }
+
+    /// Reverse the order.
+    ///
+    /// An order East from position (1,1) is reversed
+    /// to West from position (1,2).
+    pub fn reverse(&self, scope_size: &Position) -> Order {
+        let target = self.target_pos(scope_size);
+        target.order(self.dir.reverse())
     }
 }
