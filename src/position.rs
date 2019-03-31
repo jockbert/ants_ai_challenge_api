@@ -9,6 +9,37 @@ pub struct Position {
     pub col: u16,
 }
 
+impl Position {
+    /// Short hand for order to the north direction.
+    pub fn north(&self) -> Order {
+        Order {
+            pos: self.clone(),
+            dir: Direction::North,
+        }
+    }
+    /// Short hand for order to the south direction.
+    pub fn south(&self) -> Order {
+        Order {
+            pos: self.clone(),
+            dir: Direction::South,
+        }
+    }
+    /// Short hand for order to the west direction.
+    pub fn west(&self) -> Order {
+        Order {
+            pos: self.clone(),
+            dir: Direction::West,
+        }
+    }
+    /// Short hand for order to the east direction.
+    pub fn east(&self) -> Order {
+        Order {
+            pos: self.clone(),
+            dir: Direction::East,
+        }
+    }
+}
+
 impl fmt::Debug for Position {
     // Manually implemented for more compact print out
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
