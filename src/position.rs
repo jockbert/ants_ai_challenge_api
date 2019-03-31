@@ -1,10 +1,19 @@
+use std::fmt;
+
 /// Position on world map. Upper left corner is position (0,0), i.e column 0 and row 0.
-#[derive(PartialEq, Eq, Debug, Default, Hash, Clone)]
+#[derive(PartialEq, Eq, Default, Hash, Clone)]
 pub struct Position {
     /// Row in cartesian map coordinates, comparable to Y-axis value.
     pub row: u16,
     /// Column in cartesian map coordinates, comparable to X-axis value.
     pub col: u16,
+}
+
+impl fmt::Debug for Position {
+    // Manually implemented for more compact print out
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Pos {{ r: {:?}, c: {:?} }}", self.row, self.col)
+    }
 }
 
 #[derive(PartialEq, Eq, Debug, Hash, Clone, Copy)]
@@ -30,10 +39,21 @@ impl Direction {
     }
 }
 
-#[derive(PartialEq, Eq, Debug, Hash, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Order {
     pub pos: Position,
     pub dir: Direction,
+}
+
+impl fmt::Debug for Order {
+    // Manually implemented for more compact print out
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "Order {{ r:{:?}, c:{:?} -> {:?} }}",
+            self.pos.row, self.pos.col, self.dir
+        )
+    }
 }
 
 pub type Orders = Vec<Order>;
