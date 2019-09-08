@@ -14,15 +14,6 @@ pub struct WorldState {
     pub hills: Vec<Vec<Position>>,
 }
 
-fn ensure_capacity(vec: &mut Vec<Vec<Position>>, capacity: u8) {
-    while vec.len() <= capacity as usize {
-        vec.push(vec![])
-    }
-}
-fn get_or_empty(vec: &Vec<Vec<Position>>, index: u8) -> Vec<Position> {
-    vec.get(index as usize).cloned().unwrap_or_else(|| vec![])
-}
-
 impl WorldState {
     /// Add food at given position
     pub fn food(mut self, pos: Position) -> Self {
@@ -75,6 +66,16 @@ impl WorldState {
     pub fn hills_for_player(&self, player: u8) -> Vec<Position> {
         get_or_empty(&self.hills, player)
     }
+}
+
+fn ensure_capacity(vec: &mut Vec<Vec<Position>>, capacity: u8) {
+    while vec.len() <= capacity as usize {
+        vec.push(vec![])
+    }
+}
+
+fn get_or_empty(vec: &[Vec<Position>], index: u8) -> Vec<Position> {
+    vec.get(index as usize).cloned().unwrap_or_else(|| vec![])
 }
 
 #[cfg(test)]

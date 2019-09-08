@@ -90,18 +90,15 @@ impl fmt::Debug for Order {
 pub type Orders = Vec<Order>;
 
 /// Helper function (short hand) for a Position.
-pub fn pos(row: u16, column: u16) -> Position {
-    Position {
-        row: row,
-        col: column,
-    }
+pub fn pos(row: u16, col: u16) -> Position {
+    Position { row, col }
 }
 
 impl Position {
     pub fn order(&self, dir: Direction) -> Order {
         Order {
             pos: self.clone(),
-            dir: dir,
+            dir,
         }
     }
 }
