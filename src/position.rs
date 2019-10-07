@@ -1,7 +1,7 @@
 use std::fmt;
 
 /// Position on world map. Upper left corner is position (0,0), i.e column 0 and row 0.
-#[derive(PartialEq, Eq, Default, Hash, Clone)]
+#[derive(PartialEq, PartialOrd, Eq, Default, Hash, Clone)]
 pub struct Position {
     /// Row in cartesian map coordinates, comparable to Y-axis value.
     pub row: u16,
@@ -47,7 +47,7 @@ impl fmt::Debug for Position {
     }
 }
 
-#[derive(PartialEq, Eq, Debug, Hash, Clone, Copy)]
+#[derive(PartialEq, PartialOrd, Eq, Debug, Hash, Clone, Copy)]
 pub enum Direction {
     North,
     West,
@@ -70,7 +70,7 @@ impl Direction {
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, PartialOrd, Eq, Hash, Clone)]
 pub struct Order {
     pub pos: Position,
     pub dir: Direction,
