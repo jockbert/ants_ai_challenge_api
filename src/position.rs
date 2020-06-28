@@ -38,6 +38,15 @@ impl Position {
             dir: Direction::East,
         }
     }
+
+    /// Shorthand for order to pause (stay stationary), using
+    /// `Direction::NoDirection`.
+    pub fn pause(&self) -> Order {
+        Order {
+            pos: self.clone(),
+            dir: Direction::NoDirection,
+        }
+    }
 }
 
 impl fmt::Debug for Position {
