@@ -53,6 +53,7 @@ pub enum Direction {
     West,
     South,
     East,
+    NoDirection,
 }
 
 impl Direction {
@@ -66,6 +67,7 @@ impl Direction {
             South => North,
             West => East,
             East => West,
+            NoDirection => NoDirection,
         }
     }
 }
@@ -118,6 +120,10 @@ impl Order {
             Order { pos: p, dir: North } => pos((p.row + row_max - 1) % row_max, p.col),
             Order { pos: p, dir: West } => pos(p.row, (p.col + col_max - 1) % col_max),
             Order { pos: p, dir: East } => pos(p.row, (p.col + 1) % col_max),
+            Order {
+                pos: p,
+                dir: NoDirection,
+            } => p.clone(),
         }
     }
 

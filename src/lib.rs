@@ -149,6 +149,7 @@ fn serialize_orders(orders: &[Order]) -> String {
             Direction::South => 'S',
             Direction::West => 'W',
             Direction::East => 'E',
+            d => panic!("There is no serialization for direction {:?}", d),
         });
         result.push('\n');
     }
