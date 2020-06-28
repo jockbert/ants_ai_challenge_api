@@ -75,7 +75,7 @@ fn ensure_capacity(vec: &mut Vec<Vec<Position>>, capacity: u8) {
 }
 
 fn get_or_empty(vec: &[Vec<Position>], index: u8) -> Vec<Position> {
-    vec.get(index as usize).cloned().unwrap_or_else(|| vec![])
+    vec.get(index as usize).cloned().unwrap_or_else(Vec::new)
 }
 
 #[cfg(test)]

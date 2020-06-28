@@ -156,7 +156,7 @@ fn serialize_orders(orders: &[Order]) -> String {
     result
 }
 
-pub fn run_game(agent: &mut Agent) -> (WorldState, Score) {
+pub fn run_game(agent: &mut dyn Agent) -> (WorldState, Score) {
     use std::io::prelude::*;
 
     let std_in = std::io::stdin();
@@ -166,7 +166,7 @@ pub fn run_game(agent: &mut Agent) -> (WorldState, Score) {
 }
 
 pub fn run_game_with_io<I, O>(
-    agent: &mut Agent,
+    agent: &mut dyn Agent,
     mut lines_iter: I,
     outln: &mut O,
 ) -> (WorldState, Score)
