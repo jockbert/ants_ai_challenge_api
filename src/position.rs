@@ -9,6 +9,11 @@ pub struct Position {
     pub col: u16,
 }
 
+/// Helper function (short hand) for a Position.
+pub fn pos(row: u16, col: u16) -> Position {
+    Position { row, col }
+}
+
 impl Position {
     /// Short hand for order to the north direction.
     pub fn north(&self) -> Order {
@@ -46,6 +51,45 @@ impl Position {
             pos: self.clone(),
             dir: Direction::NoDirection,
         }
+    }
+
+    /// Use this position as size boundary for given arguments. Over-shoot
+    /// will be wrapped into boundaries (0,0) and this (self) position.
+    ///
+    /// # Example
+    /// ```
+    /// use ants_ai_challenge_api::pos;
+    /// use ants_ai_challenge_api::Position;
+    ///
+    /// let foo = pos(10,10);
+    /// assert_eq!(pos(0, 0), foo.as_size_for_pos(0, 0));
+    /// assert_eq!(pos(3, 4), foo.as_size_for_pos(3, 4));
+    /// assert_eq!(pos(0, 0), foo.as_size_for_pos(10, 10));
+    /// assert_eq!(pos(1, 3), foo.as_size_for_pos(11, -7));
+    /// ```
+    pub fn as_size_for_pos(&self, row: i64, col: i64) -> Position {
+        let mut mut_row = row;
+        let mut mut_col = col;
+
+        let size_row = self.row as i64;
+        let size_col = self.col as i64;
+
+        while mut_row < 0 {
+            mut_row += size_row;
+        }
+        while mut_col < 0 {
+            mut_col += size_col;
+        }
+
+        mut_row %= size_row;
+        mut_col %= size_col;
+
+        pos(mut_row as u16, mut_col as u16)
+    }
+
+    /// Use this position as size boundary for given argument.
+    pub fn as_size_for(&self, pos_to_clamp: Position) -> Position {
+        self.as_size_for_pos(pos_to_clamp.row.into(), pos_to_clamp.col.into())
     }
 }
 
@@ -99,11 +143,6 @@ impl fmt::Debug for Order {
 }
 
 pub type Orders = Vec<Order>;
-
-/// Helper function (short hand) for a Position.
-pub fn pos(row: u16, col: u16) -> Position {
-    Position { row, col }
-}
 
 impl Position {
     pub fn order(&self, dir: Direction) -> Order {
